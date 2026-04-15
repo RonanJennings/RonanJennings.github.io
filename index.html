@@ -1039,15 +1039,32 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.92);
+      background: rgba(0,0,0,0);
       z-index: 300;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 0;
+      transition: background 1s ease;
     }
 
     #cutscene-overlay.open { display: flex; }
+    #cutscene-overlay.open.ready { background: rgba(0,0,0,0.92); }
+
+    #cutscene-header,
+    #cutscene-box,
+    #cutscene-footer {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    #cutscene-overlay.content-ready #cutscene-header,
+    #cutscene-overlay.content-ready #cutscene-box,
+    #cutscene-overlay.content-ready #cutscene-footer {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     #cutscene-header {
       font-size: 10px;
@@ -2597,7 +2614,7 @@
     <div class="modal-corner tl"></div>
     <div class="modal-corner br"></div>
     <div id="endgame-title">OPERATION CONCLUDED</div>
-    <div id="endgame-subtitle">BUREAU DEBRIEF — 10 MISSIONS RESOLVED</div>
+    <div id="endgame-subtitle">BUREAU DEBRIEF — 8 MISSIONS RESOLVED</div>
     <div id="endgame-stats"></div>
     <div id="endgame-injuries"></div>
     <div class="modal-btn-row" style="justify-content:center;margin-top:24px">
@@ -2614,10 +2631,10 @@
     <div id="congrats-eyebrow">OPERATION COMPLETE</div>
     <div id="congrats-title">CASE CLOSED</div>
     <div id="congrats-traitor-line"></div>
-    <div id="congrats-body"></div>
-    <div id="congrats-note"></div>
+    <div id="congrats-body">Congratulations on catching the traitor and leading your team to success. If you want to spend more time with these characters, play DEEP COVER at Case Closed Edinburgh. Use the code: DISPATCH30 to get 30% off your booking.</div>
+    <div id="congrats-note">The traitor you just caught was randomly chosen by the game, no spoilers for Deep Cover!</div>
     <div class="modal-btn-row" style="justify-content:center;margin-top:8px">
-      <button class="btn btn-deploy" id="btn-congrats-continue">CONTINUE</button>
+      <button class="btn btn-deploy" id="btn-congrats-continue">KEEP PLAYING</button>
     </div>
   </div>
 </div>
@@ -2774,6 +2791,96 @@ const MISSION_TYPES = [
         { text: 'Eliminate the guards silently before they can raise the alarm.',                     stat: 'CMB' },
         { text: 'Find an alternate route through the maintenance shafts.',                            stat: 'STL' },
         { text: 'Trigger a false alarm remotely to pull the patrol away.',                           stat: 'TCH' },
+      ],
+    },
+  },
+    {
+    type: 'BACK DOOR TAPPING',
+    icon: '⚡',
+    desc: 'Hack into military satellites to track movements of suspicious shipments.',
+    statWeight: { STL: 0.35, PRS: 0.05, CMB: 0.15, TCH: 0.40, CRY: 0.05 },
+    keyStats: ['TCH', 'STL'],
+    interruption: {
+      scenario: 'An alarm has been triggered in the satellite control room. We need to exfiltrate immediately.',
+      options: [
+        { text: 'Take out any guards between the control room and the exit.',                     stat: 'CMB' },
+        { text: 'Disappear into the shadows and evade detection.',                            stat: 'STL' },
+        { text: 'Hack into camera relays and move through the blind spots.',                           stat: 'TCH' },
+      ],
+    },
+  },
+      {
+    type: 'ONE OF THE FAMILY',
+    icon: '▣',
+    desc: 'Go undercover in the Mancini Crime Family. Find out who\'s pulling their strings.',
+    statWeight: { STL: 0.40, PRS: 0.35, CMB: 0.15, TCH: 0.05, CRY: 0.05 },
+    keyStats: ['PRS', 'STL'],
+    interruption: {
+      scenario: 'A surprise guest is contradicting our agent\'s cover story.',
+      options: [
+        { text: 'Adapt the cover story and befriend the newcomer.',                     stat: 'PRS' },
+        { text: 'Don\'t draw attention and stay in character, no matter what.',                            stat: 'STL' },
+        { text: 'Take out the interloper before they can cause trouble.',                           stat: 'CMB' },
+      ],
+    },
+  },
+        {
+    type: 'SNAKE IN THE GRASS',
+    icon: '◈',
+    desc: 'A field agent has been injured while pursuing a lead on some encrypted intel. Get them out of there and finish their mission.',
+    statWeight: { STL: 0.10, PRS: 0.05, CMB: 0.40, TCH: 0.10, CRY: 0.35 },
+    keyStats: ['CMB', 'CRY'],
+    interruption: {
+      scenario: 'The agent\'s location has been compromised. Hostile teams are closing in.',
+      options: [
+        { text: 'Stay low. Avoid detection at all costs.',                     stat: 'STL' },
+        { text: 'Pretend to capture out agent. Bluff your way out of it.',                            stat: 'PRS' },
+        { text: 'Eliminate the hostile strike teams, one by one.',                           stat: 'CMB' },
+      ],
+    },
+  },
+          {
+    type: 'AWOL AGENT',
+    icon: '⬡',
+    desc: 'A newly promoted field agent has gone AWOL. Locate and retrieve them before they compromise Bureau intel.',
+    statWeight: { STL: 0.05, PRS: 0.15, CMB: 0.00, TCH: 0.30, CRY: 0.50 },
+    keyStats: ['CRY', 'TCH'],
+    interruption: {
+      scenario: 'The field agent is nowhere to be found.',
+      options: [
+        { text: 'Search their last known location for clues.',                     stat: 'CRY' },
+        { text: 'Put out a call on all channels to make contact.',                            stat: 'PRS' },
+        { text: 'Remote activate their emergency tracking implant.',                           stat: 'TCH' },
+      ],
+    },
+  },
+            {
+    type: 'INTERROGATION',
+    icon: '▼',
+    desc: 'An agent was intercepted and is being held for questioning. Get them out before they reveal critical information.',
+    statWeight: { STL: 0.35, PRS: 0.05, CMB: 0.35, TCH: 0.25, CRY: 0.10 },
+    keyStats: ['CMB', 'STL'],
+    interruption: {
+      scenario: 'We can\'t reach the agent. They need to buy us time and resist questioning.',
+      options: [
+        { text: 'Slip out of the restraints and make a break for it.',                     stat: 'STL' },
+        { text: 'Time to do the talking, and turn the tables on the interrogator.',                    stat: 'PRS' },
+        { text: 'Activate the emergency transponder to signal the extraction team.',                           stat: 'TCH' },
+      ],
+    },
+  },
+              {
+    type: 'ROGUE SHIPMENT',
+    icon: '▼',
+    desc: 'A pair of Chemical Shipments are being delivered to an unknown location. Find their intended destination, and ensure they never reach it.',
+    statWeight: { STL: 0.35, PRS: 0.05, CMB: 0.35, TCH: 0.10, CRY: 0.25 },
+    keyStats: ['CMB', 'STL'],
+    interruption: {
+      scenario: 'The shipments contain explosive materials! There\'s a chance interference could trigger a detonation.',
+      options: [
+        { text: 'Extrapolate their final destination from current routes, and disrupt their paths.',                     stat: 'CRY' },
+        { text: 'No time for caution. Take them out, now.',                    stat: 'CMB' },
+        { text: 'Don\'t risk interference. Follow them and see where they end up.',                           stat: 'STL' },
       ],
     },
   },
@@ -3024,15 +3131,15 @@ const MISSION_TYPES = [
     icon: '◌',
     scripted: true,
     twoAgents: true,
-    desc: 'Internal security believes a traitor is feeding Bureau intelligence to a hostile third party. Find them.',
+    desc: 'We believe a traitor is feeding Bureau intelligence to Syndicate agents in the field. Start the trace to gather evidence.',
     statWeight: { STL: 0.10, PRS: 0.35, CMB: 0.05, TCH: 0.15, CRY: 0.35 },
     keyStats: ['CRY', 'PRS'],
     interruption: {
       scenario: 'The suspect has realised they are under scrutiny and is making contact with their handler.',
       options: [
-        { text: 'Decrypt the outgoing message before it is sent and confirm their identity.',         stat: 'CRY' },
+        { text: 'Decrypt the outgoing message before it is sent.',         stat: 'CRY' },
         { text: 'Intercept the communication channel using a planted relay device.',                  stat: 'TCH' },
-        { text: 'Engage the suspect directly and read their reaction under pressure.',                stat: 'PRS' },
+        { text: 'Engage the suspect\'s comm system directly. Buy time for the trace to complete.',                stat: 'PRS' },
       ],
     },
   },
@@ -3821,9 +3928,6 @@ function buildTraitorCluePool(agent) {
   const side = idx <= 1 ? 'LEFT' : idx <= 3 ? 'CENTRE' : 'RIGHT';
   clues.push(`The traitor is positioned on the ${side} side of the agent roster.`);
 
-  // Exact slot (1-indexed)
-  const posNames = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
-  clues.push(`The traitor is the ${posNames[idx]} agent from the left on the roster.`);
 
   // Strongest and weakest
   clues.push(`The traitor's primary field strength is ${STAT_LABELS[highest[0]]}.`);
@@ -3851,8 +3955,8 @@ function buildTraitorCluePool(agent) {
 
   // Above/below 50 for each stat
   Object.entries(stats).forEach(([stat, val]) => {
-    if (val > 50) clues.push(`The traitor's ${STAT_LABELS[stat]} score is above 50.`);
-    else          clues.push(`The traitor's ${STAT_LABELS[stat]} score is below 50.`);
+    if (val > 60) clues.push(`The traitor's ${STAT_LABELS[stat]} score is above 60.`);
+    else          clues.push(`The traitor's ${STAT_LABELS[stat]} score is below 60.`);
   });
 
   // Peak stat bucket
@@ -3873,10 +3977,6 @@ function buildTraitorCluePool(agent) {
     clues.push(`The traitor is recorded as suffering from a ${injuries[0].name}.`);
   }
 
-  // Buddy connection
-  if (buddy) {
-    clues.push(`The traitor has a documented personal connection with Agent ${buddy.name}.`);
-  }
 
   return clues;
 }
@@ -3922,12 +4022,12 @@ function addLog(text, type = 'info') {
   logEl.prepend(entry);
   // keep max 6
   while (logEl.children.length > 6) logEl.lastChild.remove();
-  // Auto-fade and remove after 20s
+  // Auto-fade and remove after 5s
   setTimeout(() => {
     entry.style.transition = 'opacity 0.6s';
     entry.style.opacity    = '0';
     setTimeout(() => { if (entry.parentNode) entry.parentNode.removeChild(entry); }, 600);
-  }, 20000);
+  }, 5000);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -4259,7 +4359,8 @@ function deployAgent(missionId, agentId, agentId2) {
 
   // Determine if an interruption fires at the halfway mark (t=5s)
   const typeInterrupt = nodeObj.mission.type.interruption;
-  const hasInterrupt  = !!typeInterrupt && Math.random() < 0.5;
+  const isFinale      = !!nodeObj.mission.isFinale;
+  const hasInterrupt  = !!typeInterrupt && (isFinale || Math.random() < 0.5);
   let interruptFired  = false;
   let chance = successChance(agent, nodeObj.mission);
   if (agent2) {
@@ -4292,7 +4393,7 @@ function deployAgent(missionId, agentId, agentId2) {
 
   // ── WINTER / FOX RAGE: double-speed missions ─────────────────
   const isDoubleSpeed = (agent.id === 'winter' && agent.abilityUnlocked) || foxRageActive;
-  const startSeconds  = isDoubleSpeed ? 15 : 30;
+  const startSeconds  = (isFinale || isDoubleSpeed) ? 15 : 30;
   if (agent.id === 'winter' && agent.abilityUnlocked) flashAbilityActivated('winter');
 
   function startCountdown(secondsLeft) {
@@ -4571,8 +4672,9 @@ function closeResultModal(missionId) {
       if (!willFireChatter && !chatterActive) {
         showAgentQuip(id, succeeded ? 'success' : 'failure');
         if (!succeeded && a.buddy && a.buddyQuip) {
+          if (a._buddyQuipIdx === undefined) a._buddyQuipIdx = 0;
           const bq = Array.isArray(a.buddyQuip)
-            ? a.buddyQuip[Math.floor(Math.random() * a.buddyQuip.length)]
+            ? a.buddyQuip[a._buddyQuipIdx++ % a.buddyQuip.length]
             : a.buddyQuip;
           setTimeout(() => showAgentQuip(a.buddy, null, bq), 1600);
         }
@@ -4617,7 +4719,7 @@ function closeResultModal(missionId) {
         chatterActive = true;
         setTimeout(() => showAgentQuip('fox',     null, "Hey, team?", true), 1400);
         setTimeout(() => showAgentQuip('epsilon',  null, "Yes, dear?", true), 3400);
-        setTimeout(() => showAgentQuip('fox',     null, "I'm picking up some encrypted signals — consistent with a Syndicate activity.", true), 5400);
+        setTimeout(() => showAgentQuip('fox',     null, "I'm picking up some encrypted signals — consistent with Syndicate activity.", true), 5400);
         setTimeout(() => showAgentQuip('epsilon', null, "That explains all the recent incidents. They must have a base somewhere.", true), 8200);
         setTimeout(() => showAgentQuip('bishop',  null, "A Syndicate Black Site? Fox, you need trace those signals.", true), 10200);
         setTimeout(() => showAgentQuip('fox',     null, "Already on it. I'll let you know.", true), 12400);
@@ -4641,18 +4743,18 @@ function closeResultModal(missionId) {
         chatterFired1 = true;
         chatterActive = true;
         setTimeout(() => showAgentQuip('neptune', null, "There's a Syndicate financier operating in the region. High-ranking. And apparently, he likes to socialise.", true), 2400);
-        setTimeout(() => showAgentQuip('winter',  null, "That's a thread worth pulling. Got a name?", true), 5400);
+        setTimeout(() => showAgentQuip('winter',  null, "Now you're talking. Got a name?", true), 5400);
         setTimeout(() => showAgentQuip('neptune', null, "Chip Lancaster.", true), 7600);
         setTimeout(() => showAgentQuip('winter',  null, "I swear that guy shows up everywhere.", true), 9800);
-        setTimeout(() => showAgentQuip('bishop', null, "If we can get close to him, we could unravel the whole network.", true), 12000);
+        setTimeout(() => showAgentQuip('bishop', null, "If we can get close to him, we could pull half of the Syndicate's funding.", true), 12000);
         setTimeout(() => { chatterActive = false; }, 16700); // 12000 + 4700
       }
 
       if (chatterFired1 && !chatterFired2 && resolved >= late) {
         chatterFired2 = true;
         chatterActive = true;
-        setTimeout(() => showAgentQuip('neptune', null, "I've got intel on the target. He'll be at the Grand Hotel tomorrow night. Alone.", true), 2400);
-        setTimeout(() => showAgentQuip('python',  null, "Perfect. I'll line up my shot. .50 cal should do the trick.", true), 4600);
+        setTimeout(() => showAgentQuip('neptune', null, "I've got intel on the financier. He'll be at the Grand Hotel tomorrow night. Alone.", true), 2400);
+        setTimeout(() => showAgentQuip('python',  null, "Perfect. I'll line up my shot. Standard 50-Cal should do the trick.", true), 4600);
         setTimeout(() => showAgentQuip('winter',  null, "No offense, Python. But I think this job requires a different approach.", true), 6600);
         setTimeout(() => showAgentQuip('winter', null, "Leave it to me.", true), 9200);
         setTimeout(() => { chatterActive = false; }, 13900); // 9200 + 4700
@@ -4899,7 +5001,10 @@ function checkGameOver() {
     playCutscene(finaleType, () => {
       const typeData = MISSION_TYPES.find(t => t.type === finaleType);
       const node     = spawnMissionNode(typeData);
-      if (node) scriptedMissionNodeId = node.id;
+      if (node) {
+        scriptedMissionNodeId = node.id;
+        node.mission.isFinale = true;
+      }
     });
     return;
   }
@@ -5164,25 +5269,31 @@ const CUTSCENES = {
   ],
   // Example: first time a BLACK SITE RAID appears
   'BLACK_SITE_RAID': [
-    { agentId: 'python',  text: 'Command, you want me to breach a black site? Those are serious facilities. Armed guards, reinforced cells, the lot.' },
-    { agentId: 'bishop',  text: 'We have reason to believe they are holding our contact there. He has intelligence that cannot fall into The Syndicate\'s hands.' },
+    { agentId: 'fox',     text: 'Bingo. Syndicate operations in the area are being conducted from one location, and I\'ve got the coordinates.' },
+    { agentId: 'python',  text: 'You want me to breach a black site? Those are serious facilities. Armed guards, reinforced cells, the lot.' },
+    { agentId: 'bishop',  text: 'We have reason to believe they are holding a high priority contact there. Someone who has intelligence that cannot fall into The Syndicate\'s hands.' },
     { agentId: 'python',  text: 'Then give me the green light. I\'ll get him out.' },
-    { agentId: 'epsilon', text: 'Python, these aren\'t militia. They will be expecting us. You\'ll need a second layer — someone to pull attention before you breach.' },
+    { agentId: 'epsilon', text: 'Python, these aren\'t militia. They will be expecting us. You\'ll need backup.' },
     { agentId: 'python',  text: 'Then be there when the door opens. I\'ll do the knocking.' },
   ],
   // Example: first time a MOLE HUNT appears
   'MOLE_HUNT': [
-    { agentId: 'bishop',  text: 'Someone inside the Bureau has been feeding intelligence to the other side. I\'ve suspected it for months.' },
-    { agentId: 'neptune', text: 'The data anomalies in the secure archive — you think that was them?' },
-    { agentId: 'bishop',  text: 'I think it was the beginning. The question is how deep they\'ve burrowed, and who they\'re selling to.' },
+    { agentId: 'neptune', text: 'It\'s time to face the truth. The Syndicate has been one step ahead of us too many times. There\'s only one logical explanation.' },
+    { agentId: 'bishop',  text: 'Unacceptable. I trust all of our agents implicitly.' },
+    { agentId: 'python', text: 'Too many missions with too many slip ups. It\'s like they know our whole playbook. We have a mole.' },
+    { agentId: 'epsilon',  text: 'One of us?' },
+    { agentId: 'winter', text: 'One of us.' },
+    { agentId: 'python', text: 'Damn. So how do we do this.' },
     { agentId: 'fox',     text: 'I can pull access logs, cross-reference transmission times. If there\'s a pattern, I\'ll find it.' },
-    { agentId: 'bishop',  text: 'Quietly, Fox. If they know we\'re looking, they\'ll go dark. We need them to feel safe long enough to make a mistake.' },
+    { agentId: 'bishop',  text: 'Careful, Fox. Whoever it is, they\'re on this call right now. They know we\'re onto them.' },
   ],
   // Example: first time a HONEYTRAP appears
   'HONEYTRAP': [
-    { agentId: 'winter',  text: 'Ready to meet the Syndicate financier. Finally, a mission suited to my particular talents.' },
-    { agentId: 'epsilon', text: 'Don\'t get comfortable. This isn\'t the target\'s first rodeo.' },
-    { agentId: 'winter',  text: 'Not mine either. The charm offensive is powering up.' },
+    { agentId: 'epsilon', text: 'The Syndicate are being funded by several dodgy corporations they\'ve got on side.' },
+    { agentId: 'epsilon', text: 'Chip Lancaster is one of their key financiers. And intel suggests he\'s spending tonight alone in the Grand Hotel.' },
+    { agentId: 'winter',  text: 'Not quite so alone. Finally, a mission suited to my talents.' },
+    { agentId: 'epsilon', text: 'Don\'t get comfortable. This isn\'t Lancaster\'s first rodeo.' },
+    { agentId: 'winter',  text: 'Not mine either. I\'ve got my charm offensive all powered up.' },
     { agentId: 'fox',     text: 'Winter, this isn\'t a social occasion. In and out, no messing around.' },
     { agentId: 'winter',  text: 'Fox. It\'s always a social occasion.' },
   ],
@@ -5192,6 +5303,16 @@ const shownCutscenes = new Set();
 let cutsceneLines = [];
 let cutsceneIndex = 0;
 let cutsceneCallback = null;
+
+function openCutsceneOverlay() {
+  const el = document.getElementById('cutscene-overlay');
+  el.classList.remove('ready', 'content-ready');
+  el.classList.add('open');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { el.classList.add('ready'); });
+  });
+  setTimeout(() => { el.classList.add('content-ready'); }, 1000);
+}
 
 function playCutscene(missionType, onComplete) {
   const key = missionType.replace(/\s+/g, '_');
@@ -5206,7 +5327,7 @@ function playCutscene(missionType, onComplete) {
   cutsceneCallback = onComplete;
 
   renderCutsceneLine();
-  document.getElementById('cutscene-overlay').classList.add('open');
+  openCutsceneOverlay();
   pauseGame();
 }
 
@@ -5249,7 +5370,8 @@ function advanceCutscene() {
 }
 
 function endCutscene() {
-  document.getElementById('cutscene-overlay').classList.remove('open');
+  const el = document.getElementById('cutscene-overlay');
+  el.classList.remove('open', 'ready', 'content-ready');
   resumeGame();
   if (cutsceneCallback) {
     const cb = cutsceneCallback;
@@ -5266,7 +5388,7 @@ function playCutsceneForce(key, onComplete) {
   cutsceneIndex    = 0;
   cutsceneCallback = onComplete;
   renderCutsceneLine();
-  document.getElementById('cutscene-overlay').classList.add('open');
+  openCutsceneOverlay();
   pauseGame();
 }
 
@@ -5313,7 +5435,7 @@ function handleAccusation(accusedId) {
     ? () => showApprehensionMission(traitor, results => showCongratsScreen(traitor, results, () => continueAfterTraitor(traitor, correct, accused, results)))
     : () => restartOperation4();
   renderCutsceneLine();
-  document.getElementById('cutscene-overlay').classList.add('open');
+  openCutsceneOverlay();
   pauseGame();
 }
 
