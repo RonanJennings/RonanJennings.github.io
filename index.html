@@ -5619,7 +5619,7 @@ const APPREHENSION_PHASES = [
   },
   {
     name: 'INTERCEPT',
-    desc: 'Lock down all exit routes and cut off any possibility of escape before closing in.',
+    desc: 'Lock down all exit routes and cut off any possibility of escape.',
     statWeight: { STL: 0.25, PRS: 0.05, CMB: 0.55, TCH: 0.10, CRY: 0.05 },
     keyStats: ['CMB', 'STL'],
     successMsg: 'Perimeter secured. No exit routes remain.',
@@ -5635,11 +5635,11 @@ const APPREHENSION_PHASES = [
   },
   {
     name: 'CONTAINMENT',
-    desc: 'Secure all evidence, sanitise the location, and close the operation cleanly.',
+    desc: 'Secure the traitor, keep them in custody, and move them to a secure location for further interrogation.',
     statWeight: { STL: 0.10, PRS: 0.10, CMB: 0.05, TCH: 0.35, CRY: 0.40 },
     keyStats: ['CRY', 'TCH'],
-    successMsg: 'Evidence secured. Operation fully contained.',
-    failMsg: 'Evidence compromised. Exposure risk remains.',
+    successMsg: 'Target secured. Operation fully contained.',
+    failMsg: 'Target compromised. Exposure risk remains.',
   },
 ];
 
