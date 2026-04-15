@@ -5015,7 +5015,6 @@ function openInterruptOverlay(missionId) {
     const color = STAT_COLORS[opt.stat] || 'var(--green)';
     div.innerHTML = `
       <div class="interrupt-option-text">${opt.text}</div>
-      <div class="interrupt-option-stat" style="color:${color};border-color:${color}55">${STAT_LABELS[opt.stat]}</div>
     `;
     div.addEventListener('click', () => resolveInterruptChoice(missionId, agent, opt));
     optionsEl.appendChild(div);
