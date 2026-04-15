@@ -2294,6 +2294,163 @@
       width: 28px;
       text-align: right;
     }
+
+    /* ── MOBILE RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 640px) {
+
+      /* HUD header */
+      #hud-header {
+        padding: 0 12px;
+        height: 46px;
+      }
+      #title {
+        font-size: 13px;
+        letter-spacing: 3px;
+      }
+      #hud-stats {
+        gap: 12px;
+        font-size: 11px;
+      }
+      .hud-stat-label { display: none; }
+
+      /* Mission log */
+      #mission-log {
+        width: calc(100vw - 120px);
+        top: 52px;
+        left: 10px;
+        max-height: 160px;
+      }
+      .log-entry { font-size: 11px; padding: 4px 8px; }
+
+      /* Next mission bar + score */
+      #next-mission-bar {
+        width: 110px;
+        top: 48px;
+        right: 10px;
+        font-size: 10px;
+      }
+      #score-display {
+        top: 48px;
+        right: 10px;
+        margin-top: 70px;
+      }
+      .score-val { font-size: 20px; }
+      .score-label { font-size: 9px; }
+
+      /* Roster bar — horizontal scroll */
+      #roster-bar {
+        height: 120px;
+        padding: 0 10px;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+      .roster-label { display: none; }
+      .agent-card {
+        flex: 0 0 130px;
+        height: 100px;
+        padding: 6px 8px;
+        gap: 2px;
+      }
+      .card-name { font-size: 12px; }
+      .card-status { font-size: 9px; margin-bottom: 2px; }
+      .card-stat-name { width: 58px; font-size: 9px; }
+      .card-stat-val { font-size: 10px; width: 22px; }
+      .card-stat-bar { height: 4px; }
+      .card-stats { gap: 3px; }
+      .card-stat-row { gap: 4px; font-size: 9px; }
+
+      /* Mission nodes — bigger tap target */
+      .mission-node .node-ring {
+        width: 44px;
+        height: 44px;
+      }
+      .node-icon { font-size: 20px; }
+      .node-label { font-size: 11px; }
+
+      /* Mission modal */
+      #mission-modal {
+        padding: 20px 16px 18px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      #modal-mission-name { font-size: 18px; }
+      #modal-mission-desc { font-size: 12px; margin-bottom: 14px; }
+      .agent-callsign { font-size: 13px; min-width: 80px; }
+      .agent-stat-pill { font-size: 10px; padding: 2px 6px; }
+      #agent-select-list { max-height: 240px; }
+      .modal-btn-row { gap: 8px; }
+      .btn { font-size: 12px; padding: 10px 16px; letter-spacing: 1px; }
+
+      /* Result modal */
+      #result-modal {
+        padding: 20px 16px 18px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .result-op-name { font-size: 16px; }
+      .result-outcome { font-size: 32px; letter-spacing: 4px; }
+      .result-stat-row,
+      .result-stats-title .col-labels {
+        grid-template-columns: 90px 1fr 52px;
+      }
+      .result-stat-name { font-size: 12px; }
+      .result-stat-val-agent { font-size: 14px; }
+      .result-stat-row.key-stat .result-stat-val-agent { font-size: 17px; }
+      .result-chance-val { font-size: 20px; }
+
+      /* Interrupt modal */
+      #interrupt-modal { padding: 20px 16px 18px; }
+      .interrupt-op-name { font-size: 16px; }
+      .interrupt-result-verdict { font-size: 28px; }
+
+      /* Cutscene */
+      #cutscene-box { padding: 20px 18px; }
+      #cutscene-text { font-size: 13px; }
+      #cutscene-header { margin-bottom: 24px; font-size: 9px; }
+
+      /* Upgrade / level-up */
+      #upgrade-modal { padding: 24px 18px 20px; }
+      #levelup-modal { padding: 24px 20px 20px; }
+      .upgrade-stat-row {
+        grid-template-columns: 90px 1fr 28px 90px;
+      }
+      .levelup-stat-btn {
+        grid-template-columns: 100px 1fr 36px;
+      }
+
+      /* Speech bubbles */
+      .agent-speech-bubble {
+        font-size: 11px;
+        padding: 6px 10px;
+        max-width: 150px;
+      }
+
+      /* Accusation grid */
+      #accusation-grid { gap: 10px; }
+      .accusation-card { width: 90px; padding: 12px 8px 10px; }
+      .accusation-card-name { font-size: 10px; }
+      #accusation-title { font-size: 16px; }
+      #accusation-subtitle { margin-bottom: 24px; }
+
+      /* Endgame */
+      #endgame-modal { padding: 28px 20px 24px; }
+      #endgame-title { font-size: 16px; }
+      .endgame-stat-val { font-size: 14px; }
+
+      /* Start overlay */
+      #start-title { font-size: 22px; }
+      #start-modal { padding: 28px 24px 24px; }
+
+      /* Congrats */
+      #congrats-modal { padding: 32px 24px 28px; }
+      #congrats-title { font-size: 20px; }
+
+      /* Traitor intel popup */
+      .traitor-intel-popup { max-width: calc(100vw - 32px); padding: 10px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -4037,9 +4194,10 @@ const gameContainer = document.getElementById('game-container');
 
 // Safe zones to avoid: HUD header (top 60px), roster bar (bottom 130px), margins
 function randomNodePosition() {
-  const margin = 60; // px from edges
-  const topSafe = 70;
-  const bottomSafe = 178;
+  const isMobile = window.innerWidth <= 640;
+  const margin     = isMobile ? 36 : 60;
+  const topSafe    = isMobile ? 52 : 70;
+  const bottomSafe = isMobile ? 130 : 178;
   const x = randomInRange(margin, window.innerWidth - margin);
   const y = randomInRange(topSafe + margin, window.innerHeight - bottomSafe - margin);
   return { x, y };
