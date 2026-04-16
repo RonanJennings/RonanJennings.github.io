@@ -1681,7 +1681,7 @@
       align-items: center;
       padding: 0 20px;
       gap: 12px;
-      z-index: 10;
+      z-index: 30;
     }
 
     .roster-label {
@@ -1786,6 +1786,30 @@
     @keyframes failPulse {
       0%,100% {}
       50% { box-shadow: 0 0 20px rgba(255,68,85,0.4); }
+    }
+
+    .agent-card.injury-flash {
+      border-color: rgba(255,68,85,0.9) !important;
+      background: rgba(255,68,85,0.14) !important;
+      animation: injuryFlash 2.8s ease forwards;
+    }
+    .agent-card.injury-flash::before {
+      background: linear-gradient(to right, transparent, rgba(255,68,85,0.6), transparent) !important;
+    }
+    @keyframes injuryFlash {
+      0%   { box-shadow: 0 0 0px   rgba(255,68,85,0);    transform: translateX(0); }
+      8%   { box-shadow: 0 0 28px  rgba(255,68,85,0.9);  transform: translateX(-5px); }
+      16%  { box-shadow: 0 0 28px  rgba(255,68,85,0.9);  transform: translateX(5px); }
+      24%  { box-shadow: 0 0 28px  rgba(255,68,85,0.9);  transform: translateX(-4px); }
+      32%  { box-shadow: 0 0 28px  rgba(255,68,85,0.9);  transform: translateX(4px); }
+      40%  { box-shadow: 0 0 28px  rgba(255,68,85,0.9);  transform: translateX(0); }
+      70%  { box-shadow: 0 0 18px  rgba(255,68,85,0.55); }
+      100% { box-shadow: 0 0 6px   rgba(255,68,85,0.2);  }
+    }
+
+    @keyframes injuryStatusPulse {
+      0%,100% { opacity: 1; }
+      50%     { opacity: 0.45; }
     }
 
     /* ── AGENT SPEECH BUBBLE ───────────────────────────────── */
@@ -2575,7 +2599,7 @@
     <div class="modal-corner br" style="border-color:rgba(255,215,0,0.5)"></div>
     <div id="levelup-header">FIELD PROMOTION</div>
     <div id="levelup-agent-name"></div>
-    <div id="levelup-subtitle">2 successful missions completed. Select one stat to improve (+5).</div>
+    <div id="levelup-subtitle">2 successful missions completed. Select one stat to improve (+10).</div>
     <div id="levelup-stat-list"></div>
     <div id="levelup-confirm-section" style="display:none">
       <div id="levelup-confirm-text"></div>
@@ -2659,7 +2683,6 @@
     <div id="cutscene-text"></div>
   </div>
   <div id="cutscene-footer">
-    <button class="btn btn-cancel" id="btn-cutscene-skip">SKIP</button>
     <button class="btn btn-deploy" id="btn-cutscene-next">NEXT</button>
   </div>
   <div id="cutscene-progress"></div>
@@ -2722,7 +2745,7 @@
     <div id="start-bureau-label">// BUREAU DISPATCH //</div>
     <div id="start-title">OPERATION<br>BRIEFING</div>
     <div id="start-divider"></div>
-    <div id="start-body">Your agents are standing by. Review their profiles and specialisations before the first mission is assigned. Intelligence suggests significant threat activity in the region.</div>
+    <div id="start-body">Your agents are standing by. Review their profiles and specialisations now, before the first mission is assigned. Missions will be incoming shortly. Our agents are ready, but it's your job to assign the best agent to each job.</div>
     <div id="start-hint">&#x25BC; Agents are visible in the roster below. Click any card to view their full profile.</div>
     <div class="modal-btn-row" style="justify-content:center;margin-top:28px">
       <button class="btn btn-deploy" id="btn-begin-operation">BEGIN OPERATION</button>
@@ -3127,7 +3150,7 @@ const MISSION_TYPES = [
     interruption: {
       scenario: 'Damn! The data has a secondary layer of encryption.',
       options: [
-        { text: 'Crack the secondary layer through pure cryptanalysis — no shortcuts.',               stat: 'CRY' },
+        { text: 'Crack the secondary layer through pure cryptoanalysis — no shortcuts.',               stat: 'CRY' },
         { text: 'Call tech support.',                   stat: 'PRS' },
         { text: 'Run an algorithm to attempt every possible solution.',            stat: 'TCH' },
       ],
@@ -3536,7 +3559,7 @@ const MISSION_TYPES = [
     interruption: {
       scenario: 'Our agents weren\'t trained to perform exorcisms. The demon is throwing up blood.',
       options: [
-        { text: 'THE POWER OF CHRIS COMPELLS YOU.',  stat: 'PRS' },
+        { text: 'THE POWER OF CHRIST COMPELLS YOU.',  stat: 'PRS' },
         { text: 'Translate the Latin texts to figure out the correct ritual.',     stat: 'CRY' },
         { text: 'Grab a silver dagger and holy water. Do this old school.',         stat: 'CMB' },
       ],
@@ -3545,7 +3568,7 @@ const MISSION_TYPES = [
   {
     type: 'DIRECTORS CUT',
     icon: '◑',
-    desc: 'Infiltrate a Hollywood party and stop the assassination of an award-winningfilm director.',
+    desc: 'Infiltrate a Hollywood party and stop the assassination of an award-winning film director.',
     statWeight: { STL: 0.15, PRS: 0.55, CMB: 0.05, TCH: 0.10, CRY: 0.15 },
     keyStats: ['PRS', 'CRY'],
     interruption: {
@@ -3979,14 +4002,9 @@ function agentCardHTML(agent) {
   if (agent.status === 'unavailable')  { statusTxt = 'UNAVAILABLE';  statusColor = 'color:var(--red)'; }
   if (agent.levelUpPending) { statusTxt = '★ FIELD PROMOTION'; statusColor = 'color:#ffd700'; }
 
-  const injuryBadge = (agent.lastingInjuries && agent.lastingInjuries.length > 0)
-    ? `<div style="font-size:10px;letter-spacing:1.5px;color:var(--red);opacity:0.8;margin-top:2px">&#9888; ${agent.lastingInjuries.length} LASTING INJUR${agent.lastingInjuries.length === 1 ? 'Y' : 'IES'}</div>`
-    : '';
-
   return `
     <div class="card-name">${agent.name}</div>
     <div class="card-status" style="${statusColor}">${statusTxt}</div>
-    ${injuryBadge}
     <div class="card-stats">${statRows}</div>
   `;
 }
@@ -4003,6 +4021,37 @@ function refreshCard(agentId) {
     + (agent.status === 'compromised'  ? ' injured'  : '')
     + (agent.status === 'unavailable'  ? ' injured'  : '')
     + (agent.levelUpPending            ? ' level-up' : '');
+}
+
+function flashInjuryBadge(agentId, injuryName) {
+  const card = document.getElementById(`card-${agentId}`);
+  if (!card) return;
+  const statusEl = card.querySelector('.card-status');
+  if (!statusEl) return;
+  const prevText  = statusEl.textContent;
+  const prevColor = statusEl.style.color;
+  const prevAnim  = statusEl.style.animation;
+
+  // Flash the card with shake + red glow
+  card.classList.add('injury-flash');
+
+  // Status line: prominent pulsing injury text
+  statusEl.textContent = `⚠ ${injuryName.toUpperCase()}`;
+  statusEl.style.color     = 'var(--red)';
+  statusEl.style.opacity   = '1';
+  statusEl.style.fontWeight = '700';
+  statusEl.style.animation = 'injuryStatusPulse 0.9s ease 3';
+
+  // Show an agent speech bubble for the injury
+  showAgentQuip(agentId, null, `I'm injured — ${injuryName}.`, false);
+
+  setTimeout(() => {
+    card.classList.remove('injury-flash');
+    statusEl.textContent  = prevText;
+    statusEl.style.color  = prevColor;
+    statusEl.style.animation = prevAnim || '';
+    statusEl.style.fontWeight = '';
+  }, 7000);
 }
 
 function flashAbilityActivated(agentId) {
@@ -4023,6 +4072,10 @@ function flashAbilityActivated(agentId) {
 }
 
 function showAgentQuip(agentId, chance, overrideText, isChatter) {
+  if (isChatter && chatterPaused) {
+    chatterQueue.push({ agentId, overrideText });
+    return;
+  }
   const agent = AGENTS.find(a => a.id === agentId);
   const card  = document.getElementById(`card-${agentId}`);
   const bar   = document.getElementById('roster-bar');
@@ -4038,7 +4091,7 @@ function showAgentQuip(agentId, chance, overrideText, isChatter) {
     text = overrideText;
   } else if (agent.quips) {
     const quipKey = typeof chance === 'string' ? chance
-      : chance >= 65 ? 'good' : chance <= 40 ? 'bad' : 'neutral';
+      : chance >= 65 ? 'good' : chance < 50 ? 'bad' : 'neutral';
     const quip = agent.quips[quipKey];
     if (Array.isArray(quip)) {
       if (agent._quipIdx === undefined) agent._quipIdx = {};
@@ -4208,7 +4261,17 @@ function randomNodePosition() {
 function spawnMissionNode(forcedTypeData) {
   if (!forcedTypeData && activeNodes.length >= 5) return; // cap at 5 simultaneous missions
   const spawnPool = MISSION_TYPES.filter(t => !t.scripted);
-  const typeData = forcedTypeData || spawnPool[Math.floor(Math.random() * spawnPool.length)];
+  let typeData;
+  if (forcedTypeData) {
+    typeData = forcedTypeData;
+  } else {
+    // Shuffle-bag: pick only from types not yet used this cycle
+    const available = spawnPool.filter(t => !usedMissionTypes.includes(t.type));
+    if (available.length === 0) usedMissionTypes = []; // all used — reset cycle
+    const pool = available.length > 0 ? available : spawnPool;
+    typeData = pool[Math.floor(Math.random() * pool.length)];
+    usedMissionTypes.push(typeData.type);
+  }
   const name = pickMissionName();
   const missionId = ++missionIdCounter;
   const pos = randomNodePosition();
@@ -4220,7 +4283,7 @@ function spawnMissionNode(forcedTypeData) {
     pos,
     agentId: null,
     state: 'pending', // pending | active | done
-    timeLeft: 30,
+    timeLeft: operationNumber >= 4 ? 20 : operationNumber === 3 ? 25 : 30,
   };
 
   const el = document.createElement('div');
@@ -4385,6 +4448,7 @@ function _openMissionModalInner(missionId) {
   successPreview.classList.remove('visible');
   btnDeploy.disabled = true;
   overlay.classList.add('open');
+  chatterPaused = true;
   pauseGame();
 }
 
@@ -4439,12 +4503,29 @@ function selectAgent(optionEl, agentId, mission) {
   }
 }
 
+function drainChatterQueue() {
+  if (chatterQueue.length === 0) return;
+  const queued = chatterQueue.slice();
+  chatterQueue = [];
+  chatterActive = true;
+  queued.forEach(({ agentId, overrideText }, i) => {
+    setTimeout(() => {
+      showAgentQuip(agentId, null, overrideText, true);
+      if (i === queued.length - 1) {
+        setTimeout(() => { chatterActive = false; }, 5500);
+      }
+    }, i * 2800);
+  });
+}
+
 function closeModal() {
   overlay.classList.remove('open');
   currentModalNodeId = null;
   selectedAgentId    = null;
   selectedAgentId2   = null;
   btnDeploy.textContent = 'DEPLOY';
+  chatterPaused = false;
+  drainChatterQueue();
   resumeGame();
 }
 
@@ -4487,7 +4568,7 @@ function deployAgent(missionId, agentId, agentId2) {
   nodeObj.mission.agentId  = agentId;
   nodeObj.mission.agentId2 = agentId2 || null;
   nodeObj.mission.state    = 'active';
-  nodeObj.mission.timeLeft = 30;
+  nodeObj.mission.timeLeft = operationNumber >= 4 ? 20 : operationNumber === 3 ? 25 : 30;
 
   // Cancel the pending expiry countdown
   if (nodeObj.expiryTimerId) {
@@ -4552,8 +4633,9 @@ function deployAgent(missionId, agentId, agentId2) {
   }
 
   // ── WINTER / FOX RAGE: double-speed missions ─────────────────
+  const baseDuration = operationNumber >= 4 ? 20 : operationNumber === 3 ? 25 : 30;
   const isDoubleSpeed = (agent.id === 'winter' && agent.abilityUnlocked) || foxRageActive;
-  const startSeconds  = (isFinale || isDoubleSpeed) ? 15 : 30;
+  const startSeconds  = (isFinale || isDoubleSpeed) ? Math.floor(baseDuration / 2) : baseDuration;
   if (agent.id === 'winter' && agent.abilityUnlocked) flashAbilityActivated('winter');
 
   function startCountdown(secondsLeft) {
@@ -4696,6 +4778,7 @@ function openResultModal(missionId) {
   document.getElementById('result-score-gain').dataset.succeeded = succeeded;
 
   document.getElementById('result-overlay').classList.add('open');
+  chatterPaused = true;
   pauseGame();
 
   // Animate bars in after brief delay
@@ -4750,6 +4833,8 @@ function showOutcomeReveal(missionId) {
 
 function closeResultModal(missionId) {
   document.getElementById('result-overlay').classList.remove('open');
+  chatterPaused = false;
+  drainChatterQueue();
   const modal = document.getElementById('result-modal');
   modal.style.borderColor = '';
   modal.style.boxShadow   = '';
@@ -4785,8 +4870,8 @@ function closeResultModal(missionId) {
 
   // Pre-check: will chatter fire this call? (counts already updated above)
   const _cResolved = completedCount + failedCount;
-  const _cHalf     = Math.floor(MISSIONS_TO_WIN / 2);
-  const _cLate     = Math.floor(MISSIONS_TO_WIN * 0.75);
+  const _cHalf     = Math.floor(getMissionsToWin() / 2);
+  const _cLate     = Math.floor(getMissionsToWin() * 0.75);
   const willFireChatter = operationNumber >= 1 && operationNumber <= 3 && (
     (!chatterFired1 && _cResolved >= _cHalf) ||
     (chatterFired1 && !chatterFired2 && _cResolved >= _cLate)
@@ -4868,86 +4953,111 @@ function closeResultModal(missionId) {
   removeNode(missionId);
 
   // Foreshadowing chatter — per operation
+  // startChatter: runs fn immediately if idle, otherwise queues it
+  function startChatter(fn) {
+    if (chatterActive) { pendingChatterBlock = fn; }
+    else { fn(); }
+  }
+  function endChatter() {
+    chatterActive = false;
+    if (pendingChatterBlock) {
+      const next = pendingChatterBlock;
+      pendingChatterBlock = null;
+      setTimeout(next, 800); // brief pause between conversations
+    }
+  }
   {
     const resolved = completedCount + failedCount;
-    const half     = Math.floor(MISSIONS_TO_WIN / 2);
-    const late     = Math.floor(MISSIONS_TO_WIN * 0.75);
+    const half     = Math.floor(getMissionsToWin() / 2);
+    const late     = Math.floor(getMissionsToWin() * 0.75);
 
     if (operationNumber === 1) {
       if (!chatterFired1 && resolved >= half) {
         chatterFired1 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('fox',     null, "Hey, team?", true), 1400);
-        setTimeout(() => showAgentQuip('epsilon',  null, "Yes, dear?", true), 3400);
-        setTimeout(() => showAgentQuip('fox',     null, "I'm picking up some encrypted signals — consistent with Syndicate activity.", true), 5400);
-        setTimeout(() => showAgentQuip('epsilon', null, "That explains all the recent incidents. They must have a base somewhere.", true), 8200);
-        setTimeout(() => showAgentQuip('bishop',  null, "A Syndicate Black Site? Fox, you need trace those signals.", true), 10200);
-        setTimeout(() => showAgentQuip('fox',     null, "Already on it. I'll let you know.", true), 12400);
-        setTimeout(() => { chatterActive = false; }, 17100); // 12400 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('fox',     null, "Hey, team?", true), 1400);
+          setTimeout(() => showAgentQuip('epsilon',  null, "Yes, dear?", true), 3400);
+          setTimeout(() => showAgentQuip('fox',     null, "I'm picking up some encrypted signals — consistent with Syndicate activity.", true), 5400);
+          setTimeout(() => showAgentQuip('epsilon', null, "That explains all the recent incidents. They must have a base somewhere.", true), 8200);
+          setTimeout(() => showAgentQuip('bishop',  null, "A Syndicate Black Site? Fox, you need trace those signals.", true), 10200);
+          setTimeout(() => showAgentQuip('fox',     null, "Already on it. I'll let you know.", true), 12400);
+          setTimeout(() => endChatter(), 17100);
+        });
       }
 
       if (chatterFired1 && !chatterFired2 && resolved >= late) {
         chatterFired2 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('fox',    null, "Got it! I have the location of the Black Site. Coordinates confirmed.", true), 2400);
-        setTimeout(() => showAgentQuip('fox',     null, "Sounds like they have someone captive inside.", true), 5400);
-        setTimeout(() => showAgentQuip('epsilon', null, "We can't leave anyone behind. We have to get them out.", true), 7400);
-        setTimeout(() => showAgentQuip('fox',     null, "Looks like they have some pretty serious security.", true), 9400);
-        setTimeout(() => showAgentQuip('bishop',  null, "Nothing that Agent Python can't handle.", true), 11400);
-        setTimeout(() => { chatterActive = false; }, 16100); // 11400 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('fox',    null, "Got it! I have the location of the Black Site. Coordinates confirmed.", true), 2400);
+          setTimeout(() => showAgentQuip('fox',     null, "Sounds like they have someone captive inside.", true), 5400);
+          setTimeout(() => showAgentQuip('epsilon', null, "We can't leave anyone behind. We have to get them out.", true), 7400);
+          setTimeout(() => showAgentQuip('fox',     null, "Looks like they have some pretty serious security.", true), 9400);
+          setTimeout(() => showAgentQuip('bishop',  null, "Nothing that Agent Python can't handle.", true), 11400);
+          setTimeout(() => endChatter(), 16100);
+        });
       }
     }
 
     else if (operationNumber === 2) {
       if (!chatterFired1 && resolved >= half) {
         chatterFired1 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('neptune', null, "There's a Syndicate financier operating in the region. High-ranking. And apparently, he likes to socialise.", true), 2400);
-        setTimeout(() => showAgentQuip('winter',  null, "Now you're talking. Got a name?", true), 5400);
-        setTimeout(() => showAgentQuip('neptune', null, "Chip Lancaster.", true), 7600);
-        setTimeout(() => showAgentQuip('winter',  null, "I swear that guy shows up everywhere.", true), 9800);
-        setTimeout(() => showAgentQuip('bishop', null, "If we can get close to him, we could pull half of the Syndicate's funding.", true), 12000);
-        setTimeout(() => { chatterActive = false; }, 16700); // 12000 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('neptune', null, "There's a Syndicate financier operating in the region. High-ranking. And apparently, he likes to socialise.", true), 2400);
+          setTimeout(() => showAgentQuip('winter',  null, "Now you're talking. Got a name?", true), 5400);
+          setTimeout(() => showAgentQuip('neptune', null, "Chip Lancaster.", true), 7600);
+          setTimeout(() => showAgentQuip('winter',  null, "I swear that guy shows up everywhere.", true), 9800);
+          setTimeout(() => showAgentQuip('bishop', null, "If we can get close to him, we could pull half of the Syndicate's funding.", true), 12000);
+          setTimeout(() => endChatter(), 16700);
+        });
       }
 
       if (chatterFired1 && !chatterFired2 && resolved >= late) {
         chatterFired2 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('neptune', null, "I've got intel on the financier. He'll be at the Grand Hotel tomorrow night. Alone.", true), 2400);
-        setTimeout(() => showAgentQuip('python',  null, "Perfect. I'll line up my shot. Standard 50-Cal should do the trick.", true), 4600);
-        setTimeout(() => showAgentQuip('winter',  null, "No offense, Python. But I think this job requires a different approach.", true), 6600);
-        setTimeout(() => showAgentQuip('winter', null, "Leave it to me.", true), 9200);
-        setTimeout(() => { chatterActive = false; }, 13900); // 9200 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('neptune', null, "I've got intel on the financier. He'll be at the Grand Hotel tomorrow night. Alone.", true), 2400);
+          setTimeout(() => showAgentQuip('python',  null, "Perfect. I'll line up my shot. Standard 50-Cal should do the trick.", true), 4600);
+          setTimeout(() => showAgentQuip('winter',  null, "No offense, Python. But I think this job requires a different approach.", true), 6600);
+          setTimeout(() => showAgentQuip('winter', null, "Leave it to me.", true), 9200);
+          setTimeout(() => endChatter(), 13900);
+        });
       }
     }
 
     else if (operationNumber === 3) {
       if (!chatterFired1 && resolved >= half) {
         chatterFired1 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('epsilon', null, "I've been running analysis on our recent operations. Something doesn't add up.", true), 1400);
-        setTimeout(() => showAgentQuip('fox',     null, "What kind of something?", true), 4000);
-        setTimeout(() => showAgentQuip('epsilon', null, "The Syndicate keeps anticipating our moves. The timing is too precise to be coincidence.", true), 5800);
-        setTimeout(() => showAgentQuip('bishop',  null, "You're saying we have a mole.", true), 9000);
-        setTimeout(() => showAgentQuip('epsilon', null, "I'm saying we might. I need more data. Everyone keep their heads down.", true), 11000);
-        setTimeout(() => { chatterActive = false; }, 15700); // 11000 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('epsilon', null, "I've been running analysis on our recent operations. Something doesn't add up.", true), 1400);
+          setTimeout(() => showAgentQuip('fox',     null, "What kind of something?", true), 4000);
+          setTimeout(() => showAgentQuip('epsilon', null, "The Syndicate keeps anticipating our moves. The timing is too precise to be coincidence.", true), 5800);
+          setTimeout(() => showAgentQuip('bishop',  null, "You're saying we have a mole.", true), 9000);
+          setTimeout(() => showAgentQuip('epsilon', null, "I'm saying we might. I need more data. Everyone keep their heads down.", true), 11000);
+          setTimeout(() => endChatter(), 15700);
+        });
       }
 
       if (chatterFired1 && !chatterFired2 && resolved >= late) {
         chatterFired2 = true;
-        chatterActive = true;
-        setTimeout(() => showAgentQuip('epsilon', null, "I've narrowed it down. There's a leak, and I know where to start looking.", true), 1400);
-        setTimeout(() => showAgentQuip('fox',     null, "How do we play this?", true), 4600);
-        setTimeout(() => showAgentQuip('bishop',  null, "Carefully. If they know we're onto them, they'll vanish.", true), 6400);
-        setTimeout(() => showAgentQuip('epsilon', null, "Leave it to me. I'll flush them out.", true), 9000);
-        setTimeout(() => { chatterActive = false; }, 13700); // 9000 + 4700
+        startChatter(() => {
+          chatterActive = true;
+          setTimeout(() => showAgentQuip('epsilon', null, "I've narrowed it down. There's a leak, and I know where to start looking.", true), 1400);
+          setTimeout(() => showAgentQuip('fox',     null, "How do we play this?", true), 4600);
+          setTimeout(() => showAgentQuip('bishop',  null, "Carefully. If they know we're onto them, they'll vanish.", true), 6400);
+          setTimeout(() => showAgentQuip('epsilon', null, "Leave it to me. I'll flush them out.", true), 9000);
+          setTimeout(() => endChatter(), 13700);
+        });
       }
     }
 
     else if (operationNumber === 4 && succeeded) {
       setTimeout(() => showTraitorIntel(), 2200);
     }
-  }
+  } // end chatter block
 
   resumeGame();
   checkGameOver();
@@ -5021,6 +5131,7 @@ function openInterruptOverlay(missionId) {
   });
 
   document.getElementById('interrupt-overlay').classList.add('open');
+  chatterPaused = true;
   pauseGame();
 }
 
@@ -5075,6 +5186,8 @@ function resolveInterruptChoice(missionId, agent, option) {
 
 document.getElementById('btn-interrupt-continue').addEventListener('click', () => {
   document.getElementById('interrupt-overlay').classList.remove('open');
+  chatterPaused = false;
+  drainChatterQueue();
   resumeGame();
   const bonus     = parseInt(document.getElementById('btn-interrupt-continue').dataset.bonus) || 0;
   const missionId = parseInt(document.getElementById('btn-interrupt-continue').dataset.missionId);
@@ -5104,7 +5217,9 @@ document.getElementById('btn-interrupt-continue').addEventListener('click', () =
 // ─────────────────────────────────────────────────────────────
 //  HUD UPDATES
 // ─────────────────────────────────────────────────────────────
-const MISSIONS_TO_WIN = 8;
+function getMissionsToWin() {
+  return operationNumber >= 3 ? 6 : 8;
+}
 
 // Scripted finale missions by operation number (1-indexed)
 const SCRIPTED_FINALES = [
@@ -5121,8 +5236,12 @@ let gameOverShown          = false;
 let chatterFired1          = false;
 let chatterFired2          = false;
 let chatterActive          = false;
+let chatterPaused          = false;
+let chatterQueue           = [];
+let pendingChatterBlock    = null; // queued conversation waiting for active chatter to finish
 let traitorAgentId         = null;
 let usedTraitorClues       = [];
+let usedMissionTypes       = []; // shuffle-bag: reset when all non-scripted types used
 
 // ── Special ability state ─────────────────────────────────────
 let neptuneRevealCount  = 0;   // # of upcoming missions with visible success %
@@ -5134,7 +5253,7 @@ function checkGameOver() {
   const resolved = completedCount + failedCount;
 
   // Phase 1: at round limit, spawn the scripted finale mission
-  if (!scriptedMissionSpawned && resolved >= MISSIONS_TO_WIN) {
+  if (!scriptedMissionSpawned && resolved >= getMissionsToWin()) {
     const finaleType = SCRIPTED_FINALES[operationNumber - 1];
     if (!finaleType) {
       if (operationNumber === 4) {
@@ -5230,6 +5349,7 @@ function applyLastingInjury(agent) {
   if (!agent.lastingInjuries) agent.lastingInjuries = [];
   agent.lastingInjuries.push({ name: injury.name, stat: injury.stat, penalty: injury.penalty });
   addLog(`${agent.name}: lasting injury — ${injury.name} (${STAT_LABELS[injury.stat]} −${injury.penalty})`, 'fail');
+  flashInjuryBadge(agent.id, injury.name);
 }
 
 function tickAgentRest() {
@@ -5269,7 +5389,10 @@ const SPAWN_MIN = 5; // seconds
 const SPAWN_MAX = 25; // seconds
 
 function randomSpawnInterval() {
-  return Math.floor(Math.random() * (SPAWN_MAX - SPAWN_MIN + 1)) + SPAWN_MIN;
+  // Max spawn gap shrinks each operation: op1=25s, op2=20s, op3=17s, op4=14s
+  const maxByOp = [25, 20, 17, 14];
+  const spawnMax = maxByOp[Math.min(operationNumber - 1, maxByOp.length - 1)];
+  return Math.floor(Math.random() * (spawnMax - SPAWN_MIN + 1)) + SPAWN_MIN;
 }
 
 let currentSpawnInterval = randomSpawnInterval();
@@ -5327,7 +5450,6 @@ document.getElementById('btn-review-agents').addEventListener('click', openUpgra
 document.getElementById('btn-upgrade-skip').addEventListener('click', openAbilityPickScreen);
 document.getElementById('btn-upgrade-confirm').addEventListener('click', confirmUpgrades);
 
-document.getElementById('btn-cutscene-skip').addEventListener('click', () => endCutscene());
 document.getElementById('btn-cutscene-next').addEventListener('click', () => advanceCutscene());
 document.getElementById('btn-apprehension-deploy').addEventListener('click', deployApprehensionPhase);
 document.getElementById('btn-apprehension-continue').addEventListener('click', advanceApprehensionPhase);
@@ -5407,7 +5529,7 @@ const CUTSCENES = {
   ],
   'OUTCOME_WRONG_BISHOP': [
     { agentId: 'bishop',  text: 'After everything, you think I could betray the Bureau?' },
-    { agentId: 'neptune', text: 'Bishop wouldn\'t. She\'s practically built this place from the ground up.' },
+    { agentId: 'neptune', text: 'Bishop wouldn\'t. She practically built this place from the ground up.' },
     { agentId: 'bishop',  text: 'I am not the traitor. But whoever is — they are listening to this conversation right now... and probably feeling quite smug.' },
   ],
   'OUTCOME_WRONG_EPSILON': [
@@ -5760,7 +5882,9 @@ function deployApprehensionPhase() {
   const agent   = AGENTS.find(a => a.id === apprehensionSelectedAgt);
   const fakeM   = { type: { statWeight: phase.statWeight, keyStats: phase.keyStats, twoAgents: false } };
   const chance  = successChance(agent, fakeM);
-  const success = Math.random() * 100 < chance;
+  const isLastPhase = apprehensionPhaseIndex >= APPREHENSION_PHASES.length - 1;
+  // Final phase always succeeds — players should end on a high note
+  const success = isLastPhase ? true : Math.random() * 100 < chance;
 
   document.getElementById('apprehension-select-section').style.display = 'none';
   document.getElementById('apprehension-processing').style.display     = 'block';
@@ -5821,8 +5945,8 @@ function showCongratsScreen(traitor, appResults, onContinue) {
   document.getElementById('congrats-traitor-line').textContent =
     `TRAITOR IDENTIFIED — ${traitor.name} HAS BEEN APPREHENDED`;
   document.getElementById('congrats-body').textContent = 'CONGRATULATIONS ON LEADING YOUR TEAM TO SUCCESS! IF YOU WANT TO SEE MORE OF THESE CHARACTERS, CHECK OUT "DEEP COVER", AT CASE CLOSED EDINBURGH.';
-  document.getElementById('congrats-note').textContent = 'Book for 30% off with the code "DISPATCH99" !';
-    `The Traitor in this game was randomly chosen! No spoilers for Deep Cover!  ·  ${traitor.name} APPREHENDED!`;
+  document.getElementById('congrats-note').textContent = 'The Traitor in this game was randomly chosen! No spoilers for Deep Cover! !';
+   
 
   const btn = document.getElementById('btn-congrats-continue');
   btn.onclick = () => {
@@ -5920,7 +6044,7 @@ function openUpgradeScreen() {
             <div class="upgrade-stat-bar-fill" id="upgrade-bar-${agent.id}-${key}" style="width:${Math.min(val,100)}%;background:${STAT_COLORS[key]};opacity:0.85"></div>
           </div>
           <span class="upgrade-stat-val" id="upgrade-val-${agent.id}-${key}" style="color:${STAT_COLORS[key]}">${val}</span>
-          <button class="upgrade-btn" data-agent="${agent.id}" data-stat="${key}">+10 &nbsp;(100 pts)</button>
+          <button class="upgrade-btn" data-agent="${agent.id}" data-stat="${key}">+5 &nbsp;(100 pts)</button>
         </div>
       `).join('');
 
